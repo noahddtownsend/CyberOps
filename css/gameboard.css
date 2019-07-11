@@ -1,0 +1,84 @@
+.hexRow0 {
+    position: absolute;
+    left: 195px;
+    top: 0px;
+}
+
+.hexRow1 {
+    position: absolute;
+    top: 38px;
+    left: 130px;
+}
+
+.hexRow2 {
+    position: absolute;
+    left: 65px;
+    top: 76px;
+}
+
+.hexRow3 {
+    position: absolute;
+    left: 0px;
+    top: 114px;
+}
+
+.hexBoard {
+    position: relative;
+    display: inline-block;
+    top: 280px;
+}
+
+#board1 {
+    transform: rotate(90deg);
+    left: 570px;
+    top: 10px;
+}
+
+#board2 {
+    transform: scale(-1, 1);
+    left: 835px;
+}
+
+#board3 {
+    transform: rotate(90deg) scale(-1, 1);
+    left: 570px;
+    top: 850px;
+}
+
+#gameBoard {
+    position: fixed;
+    left: 10vw;
+    top: 19vh;
+    transform: scale(0.75, 0.75) translate(-50%, -50%);
+    display: inline;
+
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.serverStatusIcon {
+    filter: brightness(-200%) contrast(50%) grayscale(50%);
+    height: 100%;
+    color: black;
+    border-radius: 100%;
+}
+
+#board1 .serverStatusIcon {
+    -webkit-transform: rotate(-90deg);
+    -moz-transform: rotate(-90deg);
+    -ms-transform: rotate(-90deg);
+    -o-transform: rotate(-90deg);
+    transform: rotate(-90deg);
+}
+
+#board3 .serverStatusIcon {
+    -webkit-transform: rotate(90deg);
+    -moz-transform: rotate(90deg);
+    -ms-transform: rotate(90deg);
+    -o-transform: rotate(90deg);
+    transform: rotate(90deg);
+}

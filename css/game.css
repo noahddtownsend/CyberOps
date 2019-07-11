@@ -1,0 +1,350 @@
+body {
+    background: #0f0f0f;
+    font-family: 'Muli', sans-serif;
+}
+
+#scrollingTextBackground {
+    position: fixed;
+    overflow: hidden;
+    font-size: 10px;
+    color: rgba(30, 209, 229, 0.1);
+    font-style: italic;
+    font-family: "Courier New", serif;
+    filter: blur(10%);
+
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+#gameControlsHolder {
+    position: relative;
+    float: right;
+    top: 20px;
+    right: 20px;
+    background: rgba(199, 240, 250, 0.3);
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+    border-radius: 10px;
+    height: calc(100vh - 100px);
+    width: calc(50vw - 40px);
+    color: #1ED1E5;
+    padding: 20px;
+    display: grid;
+    grid-template-rows: 2fr 10fr 7fr;
+    grid-template-areas: "playername" "computingpower" "terminal";
+}
+
+.playerInfo {
+    position: absolute;
+    top: 20px;
+    display: flex;
+    transform: scale(0.75, 0.75);
+    font-weight: 600;
+}
+
+#playerName {
+    font-size: 3em;
+    margin-left: 30px;
+    margin-top: 8px;
+}
+
+p {
+    font-weight: 200;
+    font-size: 5em;
+    color: white;
+}
+
+#compPowerControls {
+    position: relative;
+    grid-area: computingpower;
+    display: grid;
+    grid-template-columns: 2fr 5fr;
+    grid-template-rows: 7fr 1fr;
+    grid-template-areas: "graph orders" "submit submit";
+    overflow: hidden;
+    padding-bottom: 20px;
+}
+
+#orderHolder {
+    position: relative;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 20px;
+    padding-left: 20px;
+    border-left: #CCF5FF80 solid 1px;
+    width: auto;
+
+    margin-bottom: 20px;
+}
+
+.orderCard {
+    position: relative;
+    width: calc(100% - 40px);
+    border-radius: 10px;
+    background: rgba(199, 240, 250, 0.6);
+    padding: 20px;
+    display: grid;
+
+    grid-template-columns: 3fr 25fr 1fr;
+    grid-template-areas: "icon h1 x" "icon h1 x" "icon h1 x";
+
+    color: white;
+    margin-bottom: 20px;
+
+    -webkit-box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.2);
+    -moz-box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.2);
+    box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.2);
+}
+
+.orderCard img {
+    position: relative;
+    grid-area: icon;
+    top: 50%;
+    transform: translateY(-50%);
+    fill: rgba(199, 240, 250, 1);
+}
+
+.orderCard .orderText {
+    grid-area: h1;
+    margin-left: 20px;
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+}
+
+.orderCard h1 {
+    position: relative;
+    margin: 0px;
+}
+
+.orderCard h2 {
+    position: relative;
+    display: block;
+    margin: 0px;
+    font-weight: 200;
+}
+
+.orderCard .deleteX {
+    grid-area: x;
+    text-align: right;
+    color: #FFFFFF;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.orderCard .deleteX:hover {
+    color: #1697A5;
+}
+
+#logo {
+    position: fixed;
+    width: 30vw;
+    top: 50vh;
+    left: 50vw;
+    transform: translate(-50%, -50%);
+    z-index: -10;
+    opacity: 0.3;
+    filter: alpha(opacity=30);
+
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+#compPowerControls input {
+    border: solid #1697A5;
+    border-right-color: #1ED1E5;
+    border-bottom-color: #1ED1E5;
+    background-color: rgba(199, 240, 250, 0.6);
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 1.5em;
+    font-weight: 600;
+    color: #1697A5;
+    width: 100%;
+    /*height: 50px;*/
+    cursor: pointer;
+    grid-area: submit;
+    position: absolute;
+    bottom: 0px;
+}
+
+.serverPanel {
+    position: absolute;
+    width: 0vw;
+    height: 80vh;
+    left: 50%;
+    top: 10vh;
+    transform: translateX(-50%);
+
+    /* if no filter:     background: rgba(70, 85, 88, 0.9);*/
+    background: rgba(199, 240, 250, 0.3);
+    -webkit-backdrop-filter: blur(20px) brightness(-5);
+    backdrop-filter: blur(20px) grayscale(75%) brightness(75%);
+    border-radius: 10px;
+
+    display: grid;
+    grid-template-rows: 1fr 9fr 1fr;
+    grid-template: "label" "actions" "cancel";
+
+    animation-name: serverPanelAnimation;
+    animation-duration: 0.3s;
+    overflow: hidden;
+
+    -webkit-transition: width 0.2s;
+    -moz-transition: width 0.2s;
+    -ms-transition: width 0.2s;
+    -o-transition: width 0.2s;
+    transition: width 0.2s;
+}
+
+.serverLabel {
+    position: absolute;
+    border: #1ED1E5 solid 6px;
+    color: #1ED1E5;
+    left: 25vw;
+    top: calc(100% - 120px);
+    transform: translateX(-50%);
+    padding: 20px;
+    min-width: 500px;
+    font-weight: 900;
+    text-align: center;
+    font-size: 1.5em;
+    overflow: hidden;
+}
+
+.serverPanel .serverLabel {
+    grid-area: label;
+    left: 50%;
+    top: 20px;
+    font-size: 1.7em;
+}
+
+.serverPanel #computingPower {
+    position: relative;
+    display: block;
+    width: 10%;
+    float: right;
+    left: 95%;
+    transform: translateX(-100%);
+}
+
+.serverActions {
+    position: relative;
+    grid-area: actions;
+    width: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.serverAction {
+    margin-left: 10px;
+    cursor: pointer;
+    text-align: center;
+    color: rgba(199, 240, 250, 1);
+    flex: 1;
+    font-weight: 600;
+    font-size: 1.5em;
+}
+
+.serverAction img {
+    max-width: 10vw;
+    margin-bottom: 10px;
+}
+
+.serverAction:hover {
+    filter: brightness(200%);
+}
+
+.disabled {
+    cursor: not-allowed;
+    filter: brightness(80%);
+}
+
+.disabled:hover {
+    filter: brightness(80%);
+}
+
+.serverPanel input {
+    position: absolute;
+    grid-area: cancel;
+    left: 50%;
+    transform: translateX(-50%);
+    background: transparent;
+    bottom: 20px;
+    font-size: 1.3em;
+    border: #1ED1E5 solid 6px;
+    color: #1ED1E5;
+    padding: 10px;
+    min-width: 100px;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+}
+
+.serverPanel input:hover {
+    border-color: white;
+    color: white;
+}
+
+#compPowerControls input:hover {
+    background-color: #CCF5FF;
+}
+
+#compPowerControls input:focus {
+    outline: none;
+}
+
+/* width */
+#compPowerControls ::-webkit-scrollbar {
+    width: 10px;
+}
+
+/* Track */
+#compPowerControls ::-webkit-scrollbar-track {
+    background: #CCF5FF80;
+    border-radius: 10px;
+}
+
+/* Handle */
+#compPowerControls ::-webkit-scrollbar-thumb {
+    background: #1697A5;
+    border-radius: 10px;
+}
+
+/* Handle on hover */
+#compPowerControls ::-webkit-scrollbar-thumb:hover {
+    background: #1ED1E5;
+}
+
+.message {
+    display: none;
+    position: fixed;
+    padding: 15px;
+    top: 45px;
+    float: right;
+    right: 50px;
+    color: white;
+    text-align: center;
+    min-width: 500px;
+    font-weight: 600;
+
+    -webkit-box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.2);
+    -moz-box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.2);
+    box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.2);
+
+    background: rgba(199, 240, 250, 0.6);
+    font-size: 2em;
+    border-radius: 5px;
+}

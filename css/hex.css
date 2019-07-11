@@ -1,0 +1,221 @@
+.hexBorder {
+    position: relative;
+    background: transparent;
+    border-radius: 16%;
+    height: 70px;
+    width: 49px;
+    box-sizing: border-box;
+    transition: all 1s;
+    border: 8px solid transparent;
+    border-top-color: #1697A5;
+    border-bottom-color: #1ED1E5;
+    margin: 5px;
+    cursor: pointer;
+}
+
+.hexBorder:hover {
+    border-top-color: #1ED1E5;
+    border-bottom-color: #F0F0F0;
+}
+
+.hexBorder:hover .hex {
+    background: white;
+}
+
+.hexBorder:before, .hexBorder:after {
+    content: "";
+    border: inherit;
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    background: inherit;
+    border-radius: inherit;
+    height: 100%;
+    width: 100%;
+    box-sizing: content-box;
+    z-index: 1;
+}
+
+.hexBorder:before {
+    transform: rotate(60deg);
+    z-index: 5;
+}
+
+.hexBorder:after {
+    transform: rotate(-60deg);
+    z-index: 5;
+}
+
+.hex:before, .hex:after {
+    content: "";
+    border: inherit;
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    background: inherit;
+    border-radius: inherit;
+    height: 100%;
+    width: 100%;
+    box-sizing: content-box;
+    z-index: 1;
+}
+
+.hex:before {
+    transform: rotate(60deg);
+    z-index: 5;
+}
+
+.hex:after {
+    transform: rotate(-60deg);
+    z-index: 5;
+}
+
+.hex {
+    position: absolute;
+    border-radius: 30%;
+    top: -3px;
+    left: -6px;
+    height: 60px;
+    width: 45px;
+    box-sizing: border-box;
+    transition: all 1s;
+    border: 8px solid transparent;
+    background: #CCF5FF;
+    cursor: pointer;
+    z-index: -1;
+}
+
+.bigHexBorder {
+    position: relative;
+    background: transparent;
+    border-radius: 16%;
+    left: 340px;
+    top: 310px;
+    height: 223px;
+    width: 157px;
+    box-sizing: border-box;
+    transition: all 1s;
+    border: 12px solid transparent;
+    border-top-color: #1697A5;
+    border-bottom-color: #1ED1E5;
+    margin: 5px;
+}
+
+.bigHexBorder:before, .bigHexBorder:after {
+    content: "";
+    border: inherit;
+    position: absolute;
+    top: -13px;
+    left: -10px;
+    background: inherit;
+    border-radius: inherit;
+    height: 200px;
+    width: 130px;
+    box-sizing: content-box;
+    z-index: 1;
+}
+
+.bigHexBorder:before {
+    transform: rotate(60deg);
+    z-index: 5;
+}
+
+.bigHexBorder:after {
+    transform: rotate(-60deg);
+    z-index: 5;
+}
+
+.bigHex:before, .bigHex:after {
+    content: "";
+    border: inherit;
+    position: absolute;
+    top: -13px;
+    left: -10px;
+    background: inherit;
+    border-radius: inherit;
+    height: 200px;
+    width: 130px;
+    box-sizing: content-box;
+    z-index: 1;
+}
+
+.bigHex:before {
+    transform: rotate(60deg);
+    z-index: 5;
+    width: 140px;
+}
+
+.bigHex:after {
+    transform: rotate(-60deg);
+    z-index: 5;
+}
+
+.bigHex {
+    position: absolute;
+    border-radius: 20%;
+    top: -4px;
+    left: -6px;
+    height: 209px;
+    width: 157px;
+    box-sizing: border-box;
+    transition: all 1s;
+    border: 7px solid transparent;
+    background: #CCF5FF;
+    z-index: -1;
+}
+
+.p1 {
+    border-top-color: #B21D06;
+    border-bottom-color: #FF6D56;
+}
+
+.p1 .hex {
+    background-color: #FFC6BA;
+}
+
+.p1:hover {
+    border-top-color: #FF6D56;
+    border-bottom-color: #FFE0E0;
+}
+
+.p2 {
+    border-top-color: #36A144;
+    border-bottom-color: #4FEB79;
+}
+
+.p2 .hex {
+    background-color: #E0FFE0;
+}
+
+.p2:hover {
+    border-top-color: #4FEB79;
+    border-bottom-color: #D8F0D8;
+}
+
+.p3 {
+    border-top-color: #AF17E8;
+    border-bottom-color: #E240FF;
+}
+
+.p3 .hex {
+    background-color: #E2BFFF;
+}
+
+.p3:hover {
+    border-top-color: #E240FF;
+    border-bottom-color: #E2BFFF;
+}
+
+.p4 {
+    border-top-color: #FFBD00;
+    border-bottom-color: #FFEC57;
+}
+
+.p4 .hex {
+    background-color: #FFFDDF;
+}
+
+.p4:hover {
+    border-top-color: #FFEC57;
+    border-bottom-color: #FFFDDF;
+}

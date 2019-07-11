@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="152mm"
+   height="152mm"
+   viewBox="0 0 152 152"
+   version="1.1"
+   id="svg8"
+   sodipodi:docname="scanServerIcon.svg"
+   inkscape:version="0.92.3 (2405546, 2018-03-11)">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1.6345642"
+     inkscape:cx="229.01968"
+     inkscape:cy="437.53165"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     showguides="false"
+     inkscape:guide-bbox="true"
+     inkscape:window-width="1920"
+     inkscape:window-height="1027"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:measure-start="0,0"
+     inkscape:measure-end="0,0" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-145.00002)">
+    <path
+       style="opacity:1;fill:#c7f0fa;fill-opacity:1;stroke:none;stroke-width:19.77188873;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:normal"
+       d="M 287.24414 3.7792969 A 283.46457 283.46457 0 0 0 3.7792969 287.24414 A 283.46457 283.46457 0 0 0 287.24414 570.70898 A 283.46457 283.46457 0 0 0 570.70898 287.24414 A 283.46457 283.46457 0 0 0 287.24414 3.7792969 z M 226.08203 112.85742 C 283.48468 112.85822 330.0198 159.39225 330.01953 216.79492 C 329.98087 243.90113 319.35456 269.91954 300.40625 289.30273 L 328.45703 318.39844 L 337.7168 309.4707 L 452.34375 428.375 L 417.84766 461.63086 L 303.2207 342.72656 L 312.45898 333.82031 L 283.25391 303.52734 C 266.28909 314.72964 246.41171 320.71157 226.08203 320.73047 C 168.67939 320.73073 122.14534 274.19759 122.14453 216.79492 C 122.14426 159.3915 168.67862 112.85716 226.08203 112.85742 z M 222.6875 178.73633 C 189.4794 179.6108 161.69963 202.37963 147.96094 216.01562 C 140.11368 223.80425 150.58168 228.19279 151.60742 228.1582 C 190.06562 235.58479 185.13663 249.05208 224.26367 252.57422 C 258.22142 251.0556 254.37089 237.48615 299.77539 226.48438 C 305.06368 223.90848 305.39605 220.53 300.9707 216.37891 C 292.49858 209.44317 267.46836 179.83526 222.6875 178.73633 z M 223.57422 183.77148 C 240.35136 183.77148 253.98438 197.40447 253.98438 214.18164 C 253.98438 230.95885 240.35136 244.5918 223.57422 244.5918 C 206.79707 244.5918 193.16406 230.95885 193.16406 214.18164 C 193.16406 197.40447 206.79707 183.77148 223.57422 183.77148 z M 223.57422 186.83594 C 208.45404 186.83594 196.22852 199.06153 196.22852 214.18164 C 196.22852 229.30179 208.45404 241.52148 223.57422 241.52148 C 238.69439 241.52148 250.91992 229.30179 250.91992 214.18164 C 250.91992 199.06153 238.69439 186.83594 223.57422 186.83594 z M 223.47656 195.75391 L 224.55859 195.75391 L 224.55859 202.18555 A 11.551041 11.551041 0 0 1 235.76172 213.19336 L 241.99805 213.19336 L 241.99805 214.27539 L 235.75195 214.27539 A 11.551041 11.551041 0 0 1 224.55859 225.25977 L 224.55859 231.7168 L 223.47656 231.7168 L 223.47656 225.23438 A 11.551041 11.551041 0 0 1 212.69922 214.27539 L 206.03516 214.27539 L 206.03516 213.19336 L 212.70508 213.19336 A 11.551041 11.551041 0 0 1 223.47656 202.19531 L 223.47656 195.75391 z "
+       transform="matrix(0.26458333,0,0,0.26458333,0,145.00002)"
+       id="path4553" />
+    <path
+       style="fill:#c7f0fa;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 38.200805,197.20851 c 14.458321,-11.42717 28.033103,-9.55229 43.137771,-0.0809 -11.915188,-17.0891 -33.139929,-17.40167 -43.137771,0.0809 z"
+       id="path890"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccc" />
+  </g>
+</svg>

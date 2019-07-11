@@ -1,0 +1,65 @@
+.circlechart {
+    display: none;
+}
+
+.circle-chart {
+    position: relative;
+    width: 80%;
+    height: 80%;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-weight: 200;
+}
+
+.circle-chart__circle {
+    stroke: #1697A5;
+    stroke-width: 2px;
+    stroke-linecap: round;
+    fill: none;
+    animation: circle-chart-fill 2s reverse; /* 1 */
+    transform: rotate(-90deg); /* 2, 3 */
+    transform-origin: center; /* 4 */
+}
+
+.circle-chart__circle--negative {
+    transform: rotate(-90deg) scale(1, -1); /* 1, 2, 3 */
+}
+
+.circle-chart__background {
+    stroke: #CCF5FF80;
+    stroke-width: 1.8px;
+    fill: none;
+}
+
+.circle-chart__info {
+    animation: circle-chart-appear 2s forwards;
+    opacity: 0;
+    transform: translateY(0.3em);
+}
+
+.circle-chart__percent {
+    alignment-baseline: central;
+    text-anchor: middle;
+    font-size: 1em;
+}
+
+.circle-chart__subline {
+    alignment-baseline: central;
+    text-anchor: middle;
+    font-size: 0.11em;
+    font-weight: 400;
+}
+
+@keyframes circle-chart-fill {
+    to {
+        stroke-dasharray: 0 100;
+    }
+}
+
+@keyframes circle-chart-appear {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
