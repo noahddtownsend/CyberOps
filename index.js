@@ -8,6 +8,8 @@ const UPDATE_BOARD_MSG = "updateServerBoard";
 const UPDATE_PLAYER_MSG = "updatePlayer";
 const GAME_MESSAGE = "message";
 const GLOBAL_MESSAGE = "globalMessage";
+const FIND_KEY = "findKey";
+const MOVE_KEY = "moveKey";
 
 const ACTIONS = {
     "DEFEND": 0,
@@ -44,47 +46,70 @@ http.listen(3000, function () {
 let game = new Game();
 
 io.on('connection', function (socket) {
+    let game = getGame(socket.id);
+
     socket.on('submitOrders', function (json) {
         io.to(socket.id).emit('message', 'Orders Received');
 
         let incomingOrders = JSON.parse(json);
 
-        getGame(socket.id).addPlayerOrders(socket.id, incomingOrders);
+        game.addPlayerOrders(socket.id, incomingOrders);
 
-        if (getGame(socket.id).playerOrdersCount === getGame(socket.id).playerCount) {
+        if (game.playerOrdersCount === game.playerCount) {
             game.executeOrders();
             game.updateAllPlayers(io);
-            for (let i  in getGame(socket.id).players) {
+            for (let i  in game.players) {
                 io.to(i).emit(UPDATE_BOARD_MSG, JSON.stringify(game.getServesForUpdate(i)));
             }
         }
     });
 
-    socket.on('terminalCommand', function (json) {
-        let game = getGame(socket.id);
-
+    socket.on(FIND_KEY, function (json) {
         let order = JSON.parse(json);
 
         if (order != null) {
-            if (order.object.substr(0, 1) === "local") {
+            if (order.object.toLowerCase() === "local") {
+                io.to(socket.id).emit(FIND_KEY, false.toString());
                 return;
             }
             let idLetter = idLetterToNumber(order.object.substr(0, 1));
             let idNum = order.object.substr(1);
             let server = game.servers[idLetter][idNum];
 
-            io.to(socket.id).emit(GAME_MESSAGE, server.hasFile ? "Key found!" : "Key not found");
-        } else {
-            io.to(socket.id).emit(GAME_MESSAGE, json);
+            io.to(socket.id).emit(FIND_KEY, server.hasKey.toString());
+        }
+    });
+
+    socket.on(MOVE_KEY, function (json) {
+        let order = JSON.parse(json);
+
+        if (order != null) {
+            if (order.object.toLowerCase() === "local") {
+                return;
+            }
+            let idLetter = idLetterToNumber(order.object.substr(0, 1));
+            let idNum = order.object.substr(1, 1);
+            let server = game.servers[idLetter][idNum];
+
+            let secondIdLetter = idLetterToNumber(order.object.substr(3, 1));
+            let secondIdNum = order.object.substr(4, 1);
+            let server2 = game.servers[secondIdLetter][secondIdNum];
+
+            if (server.hasKey) {
+                server.hasKey = false;
+                server2.hasKey = true;
+            }
+
+            io.to(socket.id).emit(MOVE_KEY, server.hasKey.toString());
         }
     });
 
     socket.on('disconnect', function () {
-        getGame(socket.id).removePlayer(getPlayer(socket.id));
+        game.removePlayer(getPlayer(socket.id));
     });
 
     socket.on('requestUpdate', function () {
-        socket.emit(UPDATE_BOARD_MSG, JSON.stringify(getGame(socket.id).getServesForUpdate(socket.id)));
+        socket.emit(UPDATE_BOARD_MSG, JSON.stringify(game.getServesForUpdate(socket.id)));
         socket.emit(UPDATE_PLAYER_MSG, JSON.stringify(getPlayer(socket.id)));
     });
 
@@ -179,7 +204,7 @@ function serverFactory(sessionId) {
 
                 if (blockNeedsFile && (j === 9 || rollDice(2, 2))) {
                     blockNeedsFile = false;
-                    servers[i][j].hasFile = true;
+                    servers[i][j].hasKey = true;
                     getGame(sessionId).winningServers.push(servers[i][j].id);
                 }
             }
@@ -216,7 +241,7 @@ function idNumberToLetter(i) {
 }
 
 function idLetterToNumber(letter) {
-    switch (letter) {
+    switch (letter.toUpperCase()) {
         case 'A':
             return 0;
             break;
@@ -286,6 +311,13 @@ function calculateCanSee(game) {
     }
 }
 
+function stringIsValidServer(string) {
+    return string === "local"
+        || (string.length === 2)
+        && /[a-d]/.test(string.toLowerCase().substr(0, 1))
+        && /[0-9]/.test(string.toLowerCase().substr(1))
+}
+
 function Player(name, sessionId) {
     this.name = name;
     this.sessionId = sessionId;
@@ -295,7 +327,7 @@ function Player(name, sessionId) {
     this.tempComputingPower = 0;
     this.serverCount = 0;
     this.winningServerCount = 0;
-    this.messages =[];
+    this.messages = [];
 
     game.addPlayer(this);
 
@@ -327,11 +359,13 @@ function Player(name, sessionId) {
 }
 
 function Server() {
+    let MIN_COMP_POWER = 4;
+    let MAX_COMP_POWER = 8;
     this.owner = null;
     this.id = null;
-    this.computingPower = Math.floor(Math.random() * (8 - 4 + 1) + 4);
+    this.computingPower = Math.floor(Math.random() * (MAX_COMP_POWER - MIN_COMP_POWER + 1) + MIN_COMP_POWER);
     this.ransom = false;
-    this.hasFile = false;
+    this.hasKey = false;
     this.canSee = [];
 
     this.getServerForPlayer = function (sessionId) {

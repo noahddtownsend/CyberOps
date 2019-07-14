@@ -12,6 +12,14 @@ const ACTIONS = {
     "SCAN": 100
 };
 
+socket.on('findKey', function (msg) {
+    if (msg === true.toString()) {
+        printToTerminal("Key found!")
+    } else {
+        printToTerminal("Key not found")
+    }
+});
+
 socket.on('message', function (msg) {
     showMessage(msg);
 });
@@ -72,7 +80,7 @@ socket.on('updatePlayer', function (json) {
     }
 
     $("#playerIndicator").addClass(player.playerId);
-    terminalUser.text(player.name + "@" + terminalServer + ">>")
+    updateTerminalServer()
 });
 
 function updateServerLabel(id) {
@@ -321,6 +329,7 @@ function submitOrders() {
 }
 
 let terminal = $('#terminalInput');
+let terminalTitle = $('#terminalTitleBar');
 let terminalContent = $("#terminalContent");
 let terminalUser = $('#currentTerminalUser');
 let terminalHistoryDisplay = $('#terminalHistoryDisplay');
@@ -338,28 +347,44 @@ function submitTerminalCommand() {
     terminalContent.scrollTop(99999999999);
 
     let commandParams = command.split(/\s+/);
+    //TODO: only allow terminal operations on servers that the player should have access to
     if (commandParams.length > 0) {
         let command = commandParams[0].toLowerCase();
         switch (commandParams[0]) {
             case "chsvr" :
-                if (!stringIsValidServer(commandParams[1])) {
+                if (stringIsValidServer(commandParams[1])) {
+                    terminalServer = commandParams[1].toString();
+                    if (terminalServer.toLowerCase() !== "local") {
+                        terminalServer = terminalServer.toUpperCase();
+                    }
+
+                    updateTerminalServer()
+                } else {
                     printToTerminal("USAGE: Expected server in form [a-d][0-9] (e.g. chsvr A3)");
-                    return;
                 }
-                //TODO: only allow to change to owned servers, update UI
-                terminalServer = commandParams[1].toString();
-                if (terminalServer.toLowerCase() !== "local") {
-                    terminalServer = terminalServer.toUpperCase();
+                break;
+            case "findkey":
+                socket.emit('findKey', JSON.stringify(new Order(command, terminalServer)));
+                printToTerminal("Searching for key...");
+                break;
+            case "mvkey":
+                if (stringIsValidServer(commandParams[1])) {
+                    socket.emit('moveKey', JSON.stringify(new Order(command, terminalServer + "," + commandParams[1].toString().toUpperCase())));
+                    printToTerminal("Key moved successfully");
+                } else {
+                    printToTerminal("USAGE: Expected server in form [a-d][0-9] (e.g. mvkey A3)");
                 }
-                terminalUser.text(player.name + "@" + terminalServer + ">>");
                 break;
             case "man":
-                //fall through to "HELP"
+            //fall through to "HELP"
             case "help":
                 //https://stackoverflow.com/questions/8515365/are-there-other-whitespace-codes-like-nbsp-for-half-spaces-em-spaces-en-space
-                printToTerminal("chsvr [a-d][0-9]:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select active server for receipt of terminal commands<br/>" +
-                    "clear:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8239;&#8239;Clear terminal command history<br/>" +
-                    "man:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Display list of terminal commands");
+                printToTerminal("chsvr [a-d][0-9]:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select active server for receipt of terminal commands<br/>"
+                    + "clear:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8239;&#8239;Clear terminal command history<br/>"
+                    + "findkey:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8239;&#8239;Search the server for the key file<br/>"
+                    + "man:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Display list of terminal commands<br/>"
+                    + "mvkey [a-d][0-9]:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8239;&#8239;Move the key to another server"
+                );
                 break;
             case "clear":
                 terminalHistoryDisplay.text("");
@@ -368,13 +393,17 @@ function submitTerminalCommand() {
                 printToTerminal("<a href='https://xkcd.com/149/' target='_blank'>Make your own sandwich!</a>");
                 break;
             default:
-                //socket.emit('terminalCommand', JSON.stringify(new Order(command, terminalServer)));
                 printToTerminal("Unrecognized Command!");
                 break;
         }
 
         terminalContent.scrollTop(99999999999);
     }
+}
+
+function updateTerminalServer() {
+    terminalUser.text(player.name + "@" + terminalServer + ">>");
+    terminalTitle.html("&nbsp;>_ Terminal - Server " + terminalServer);
 }
 
 function printToTerminal(message) {
@@ -384,12 +413,12 @@ function printToTerminal(message) {
 }
 
 $("#terminalContainer").click(function () {
-   terminal.focus();
+    terminal.focus();
 });
 
 function stringIsValidServer(string) {
-    return string == "local"
-        || (string.length == 2)
+    return string === "local"
+        || (string.length === 2)
         && /[a-d]/.test(string.toLowerCase().substr(0, 1))
         && /[0-9]/.test(string.toLowerCase().substr(1))
 }
@@ -410,7 +439,7 @@ $(document).on('keydown', function (e) {
                 terminalHistoryIndex = 0;
             }
 
-            setTimeout(function() {
+            setTimeout(function () {
                 terminal[0].setSelectionRange(terminal.val().length * 2, terminal.val().length * 2)
             }, 1);
         } else if (e.which === DOWN_KEY) {
@@ -421,7 +450,7 @@ $(document).on('keydown', function (e) {
                 terminalHistoryIndex = terminalHistory.length;
             }
 
-            setTimeout(function() {
+            setTimeout(function () {
                 terminal[0].setSelectionRange(terminal.val().length * 2, terminal.val().length * 2)
             }, 1);
         }
