@@ -13,11 +13,13 @@ const ACTIONS = {
 };
 
 socket.on('findKey', function (msg) {
-    if (msg === true.toString()) {
-        printToTerminal("Key found!")
-    } else {
-        printToTerminal("Key not found")
-    }
+    setTimeout(function () {
+        if (msg === true.toString()) {
+            printToTerminal("Key found!")
+        } else {
+            printToTerminal("Key not found")
+        }
+    }, Math.random() * 1000);
 });
 
 socket.on('message', function (msg) {
@@ -376,16 +378,12 @@ function submitTerminalCommand() {
                 }
                 break;
             case "man":
-            //fall through to "HELP"
+            //fallthrough to "HELP"
             case "help":
-                //https://stackoverflow.com/questions/8515365/are-there-other-whitespace-codes-like-nbsp-for-half-spaces-em-spaces-en-space
-                printToTerminal("chsvr [a-d][0-9]:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select active server for receipt of terminal commands<br/>"
-                    + "clear:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8239;&#8239;Clear terminal command history<br/>"
-                    + "findkey:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8239;&#8239;Search the server for the key file<br/>"
-                    + "man:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Display list of terminal commands<br/>"
-                    + "mvkey [a-d][0-9]:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8239;&#8239;Move the key to another server"
-                );
+                printTerminalHelp();
                 break;
+            case "cls":
+            //fallthrough to "CLEAR"
             case "clear":
                 terminalHistoryDisplay.text("");
                 break;
@@ -406,9 +404,19 @@ function updateTerminalServer() {
     terminalTitle.html("&nbsp;>_ Terminal - Server " + terminalServer);
 }
 
+function printTerminalHelp() {
+    //https://stackoverflow.com/questions/8515365/are-there-other-whitespace-codes-like-nbsp-for-half-spaces-em-spaces-en-space
+    printToTerminal("chsvr [a-d][0-9]:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select active server for receipt of terminal commands<br/>"
+        + "clear:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8239;&#8239;Clear terminal history<br/>"
+        + "findkey:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8239;&#8239;Search the server for a key file<br/>"
+        + "man:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Display list of terminal commands<br/>"
+        + "mvkey [a-d][0-9]:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8239;&#8239;Move a key to another server"
+    );
+}
+
 function printToTerminal(message) {
     terminalHistoryDisplay.append(message + "<br/>");
-    terminal.val("")
+    terminal.val("");
     terminalContent.scrollTop(99999999999);
 }
 
@@ -464,4 +472,5 @@ function Order(action, object) {
 
 $(function () {
     socket.emit('requestUpdate', '');
+    printTerminalHelp();
 });

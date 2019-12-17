@@ -49,7 +49,7 @@ io.on('connection', function (socket) {
     let game = getGame(socket.id);
 
     socket.on('submitOrders', function (json) {
-        io.to(socket.id).emit('message', 'Orders Received');
+        io.to(socket.id).emit(GAME_MESSAGE, 'Orders Received');
 
         let incomingOrders = JSON.parse(json);
 
@@ -60,6 +60,7 @@ io.on('connection', function (socket) {
             game.updateAllPlayers(io);
             for (let i  in game.players) {
                 io.to(i).emit(UPDATE_BOARD_MSG, JSON.stringify(game.getServesForUpdate(i)));
+                io.to(i).emit(GAME_MESSAGE, "Orders Executed")
             }
         }
     });
