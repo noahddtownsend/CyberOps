@@ -26,6 +26,10 @@ socket.on('message', function (msg) {
     showMessage(msg);
 });
 
+socket.on('terminal', function (msg) {
+    printToTerminal(msg);
+});
+
 socket.on('updateServerBoard', function (json) {
     playerOrders = [];
     $("#orderHolder").html("");
@@ -129,8 +133,8 @@ function showServerPanel(id) {
         "    <div class='serverActions'>\n";
 
     if (servers[id].owner !== player.playerId) {
-        let acquireDisabled = servers[id].ransom.isRansomed ? "disabled" : "";
-        let acquireFunction = servers[id].ransom.isRansomed ? "showMessage(\"Cannot acquire while held ransom\")" : "acquireServer(\"" + id + "\")";
+        let acquireDisabled = (servers[id].ransom.isRansomed && servers[id].ransom.playerId !== player.playerId)  ? "disabled" : "";
+        let acquireFunction = (servers[id].ransom.isRansomed && servers[id].ransom.playerId !== player.playerId) ? "showMessage(\"Cannot acquire while held ransom\")" : "acquireServer(\"" + id + "\")";
 
         let ransomDisabled = servers[id].ransom.isRansomed ? "disabled" : "";
         let ransomFunction = servers[id].ransom.isRansomed ? "showMessage(\"Server is already held ransom\")" : "ransomServer(\"" + id + "\")";
@@ -391,7 +395,7 @@ function submitTerminalCommand() {
                 printToTerminal("<a href='https://xkcd.com/149/' target='_blank'>Make your own sandwich!</a>");
                 break;
             default:
-                printToTerminal("Unrecognized Command!");
+                printToTerminal(commandParams[0] + ": command not found");
                 break;
         }
 

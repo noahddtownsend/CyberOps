@@ -8,6 +8,8 @@ const UPDATE_BOARD_MSG = "updateServerBoard";
 const UPDATE_PLAYER_MSG = "updatePlayer";
 const GAME_MESSAGE = "message";
 const GLOBAL_MESSAGE = "globalMessage";
+const TERMINAL_MESSAGE = "terminal";
+
 const FIND_KEY = "findKey";
 const MOVE_KEY = "moveKey";
 
@@ -77,7 +79,12 @@ io.on('connection', function (socket) {
             let idNum = order.object.substr(1);
             let server = game.servers[idLetter][idNum];
 
-            io.to(socket.id).emit(FIND_KEY, server.hasKey.toString());
+            let player = game.players[socket.id];
+            if ((server.owner === player.playerId && !server.ransom.isRansomed) || server.ransom.playerId === player.playerId) {
+                io.to(socket.id).emit(FIND_KEY, server.hasKey.toString());
+            } else {
+                io.to(socket.id).emit(TERMINAL_MESSAGE, FIND_KEY + ": cannot open " + server.id + " filesystem: Permission denied");
+            }
         }
     });
 
@@ -96,12 +103,19 @@ io.on('connection', function (socket) {
             let secondIdNum = order.object.substr(4, 1);
             let server2 = game.servers[secondIdLetter][secondIdNum];
 
-            if (server.hasKey) {
-                server.hasKey = false;
-                server2.hasKey = true;
-            }
+            let player = game.players[socket.id];
+            if (server.owner === player.playerId && !server.ransom.isRansomed) {
+                if (server.hasKey) {
+                    server.hasKey = false;
+                    server2.hasKey = true;
+                }
 
-            io.to(socket.id).emit(MOVE_KEY, server.hasKey.toString());
+                io.to(socket.id).emit(MOVE_KEY, server.hasKey.toString());
+            } else if (server.ransom.playerId === player.playerId) {
+                io.to(socket.id).emit(TERMINAL_MESSAGE, MOVE_KEY + ": cannot write " + server.id + " filesystem: Read-only");
+            } else {
+                io.to(socket.id).emit(TERMINAL_MESSAGE, MOVE_KEY + ": cannot open " + server.id + " filesystem: Permission denied");
+            }
         }
     });
 
@@ -129,13 +143,14 @@ function defendServer(sessionId, server) {
 }
 
 function acquireServer(sessionId, server) {
-    if (server.ransom.isRansomed) {
+    let player = getPlayer(sessionId);
+
+    if (server.ransom.isRansomed && server.ransom.playerId != player.playerId) {
         return;
     }
 
     let acquireCost = 5;
 
-    let player = getPlayer(sessionId);
     let game = getGame(sessionId);
 
     if (player.roundComputingPower >= acquireCost) {
@@ -156,7 +171,7 @@ function deployRansomware(sessionId, server) {
     let ransomCost = 6;
     let player = getPlayer(sessionId);
     if (player.roundComputingPower >= ransomCost && server.owner !== null && server.owner !== getPlayer(sessionId).playerId) {
-        server.ransom = rollPercentDice(0.60 - calcCompPowerPercentage(player.computingPower, game.getPlayerByPId(server.owner).computingPower + server.computingPower)) ? new Ransom(sessionId) : new Ransom(null, false);
+        server.ransom = rollPercentDice(0.60 - calcCompPowerPercentage(player.computingPower, game.getPlayerByPId(server.owner).computingPower + server.computingPower)) ? new Ransom(player.playerId) : new Ransom(null, false);
         player.roundComputingPower -= ransomCost;
     }
 }
@@ -360,11 +375,11 @@ function Player(name, sessionId) {
 }
 
 function Server() {
-    let MIN_COMP_POWER = 4;
-    let MAX_COMP_POWER = 8;
+    let MIN_RAND_COMP_POWER = 4;
+    let MAX_RAND_COMP_POWER = 8;
     this.owner = null;
     this.id = null;
-    this.computingPower = Math.floor(Math.random() * (MAX_COMP_POWER - MIN_COMP_POWER + 1) + MIN_COMP_POWER);
+    this.computingPower = Math.floor(Math.random() * (MAX_RAND_COMP_POWER - MIN_RAND_COMP_POWER + 1) + MIN_RAND_COMP_POWER);
     this.ransom = false;
     this.hasKey = false;
     this.canSee = [];
