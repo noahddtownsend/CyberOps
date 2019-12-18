@@ -9,6 +9,7 @@ const ACTIONS = {
     "ACQUIRE": 1,
     "RANSOM": 2,
     "PAY_RANSOM": 3,
+    "WIPE_SERVER": 4,
     "SCAN": 100
 };
 
@@ -133,7 +134,7 @@ function showServerPanel(id) {
         "    <div class='serverActions'>\n";
 
     if (servers[id].owner !== player.playerId) {
-        let acquireDisabled = (servers[id].ransom.isRansomed && servers[id].ransom.playerId !== player.playerId)  ? "disabled" : "";
+        let acquireDisabled = (servers[id].ransom.isRansomed && servers[id].ransom.playerId !== player.playerId) ? "disabled" : "";
         let acquireFunction = (servers[id].ransom.isRansomed && servers[id].ransom.playerId !== player.playerId) ? "showMessage(\"Cannot acquire while held ransom\")" : "acquireServer(\"" + id + "\")";
 
         let ransomDisabled = servers[id].ransom.isRansomed ? "disabled" : "";
@@ -170,6 +171,13 @@ function showServerPanel(id) {
                 "            <img src='/images/payRansomIcon.svg' class='serverActionIcon'>\n" +
                 "            <br>\n" +
                 "            <span class='serverActionText'>Pay Ransom</span>\n" +
+                "</div>\n";
+
+            panelHtml +=
+                "<div class='serverAction' onclick='wipeServer(\"" + id + "\")'>\n" +
+                "            <img src='/images/wipeServerIcon.svg' class='serverActionIcon'>\n" +
+                "            <br>\n" +
+                "            <span class='serverActionText'>Wipe Server</span>\n" +
                 "</div>\n";
         } else {
             panelHtml +=
@@ -258,6 +266,16 @@ function payRansom(id) {
     }
 }
 
+function wipeServer(id) {
+    hideServerPanel();
+    if (servers[id].ransom.isRansomed && servers[id].owner === player.playerId) {
+        playerOrders.push(new Order(ACTIONS.WIPE_SERVER, id));
+        let orderId = playerOrders.length;
+
+        createOrderCard(ACTIONS.WIPE_SERVER, 0, orderId, id)
+    }
+}
+
 function scanServer(id) {
     hideServerPanel();
     let scanCost = 6;
@@ -293,6 +311,10 @@ function createOrderCard(type, cost, orderId, id) {
         case ACTIONS.PAY_RANSOM:
             orderType = "Pay Ransom";
             icon = "/images/payRansomIcon.svg";
+            break;
+        case ACTIONS.WIPE_SERVER:
+            orderType = "Wipe Server";
+            icon = "/images/wipeServerIcon.svg";
             break;
         case ACTIONS.SCAN:
             orderType = "Scan Server";

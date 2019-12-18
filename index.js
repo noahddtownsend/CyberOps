@@ -18,6 +18,7 @@ const ACTIONS = {
     "ACQUIRE": 1,
     "RANSOM": 2,
     "PAY_RANSOM": 3,
+    "WIPE_SERVER": 4,
     "SCAN": 100
 };
 
@@ -106,8 +107,7 @@ io.on('connection', function (socket) {
             let player = game.players[socket.id];
             if (server.owner === player.playerId && !server.ransom.isRansomed) {
                 if (server.hasKey) {
-                    server.hasKey = false;
-                    server2.hasKey = true;
+                    moveKeys(server, server2);
                 }
 
                 io.to(socket.id).emit(MOVE_KEY, server.hasKey.toString());
@@ -133,6 +133,15 @@ io.on('connection', function (socket) {
     getPlayer(socket.id).updatePlayer(socket);
     fullUpdate(socket);
 });
+
+function moveKeys(serverFrom, serverTo) {
+    let keys = serverFrom.removeKeys();
+
+    keys.forEach(function (key, index) {
+        serverTo.addKey(key);
+    });
+}
+
 
 function defendServer(sessionId, server) {
     let defendCost = 3;
@@ -180,10 +189,27 @@ function payRansom(sessionId, server) {
     let ransomCost = Math.ceil(server.computingPower * 0.5) + 7;
     let player = getPlayer(sessionId);
     if (player.roundComputingPower >= ransomCost && server.ransom.isRansomed && server.owner === player.playerId) {
-        player.tempComputingPower -= (Math.ceil(server.computingPower * 0.5) + 7);
-        getPlayer(server.ransom.playerId).tempComputingPower += Math.ceil(server.computingPower * 0.5) + 7;
+        player.tempComputingPower -= ransomCost;
+        getGame(sessionId).getPlayerByPId(server.ransom.playerId).tempComputingPower += ransomCost;
         server.ransom = new Ransom(null, false);
         player.roundComputingPower -= ransomCost;
+    }
+}
+
+function wipeServer(sessionId, server) {
+    let player = getPlayer(sessionId);
+    if (server.owner === player.playerId) {
+        server.ransom = new Ransom(null, false);
+        server.owner = null;
+
+        if (server.hasKey) {
+            let newKeyServer = getGame(sessionId).randomServer();
+            while (newKeyServer.hasKey) {
+                newKeyServer = getGame(sessionId).randomServer();
+            }
+
+            moveKeys(server, newKeyServer);
+        }
     }
 }
 
@@ -220,7 +246,7 @@ function serverFactory(sessionId) {
 
                 if (blockNeedsFile && (j === 9 || rollDice(2, 2))) {
                     blockNeedsFile = false;
-                    servers[i][j].hasKey = true;
+                    servers[i][j].addKey(new Key());
                     getGame(sessionId).winningServers.push(servers[i][j].id);
                 }
             }
@@ -300,6 +326,10 @@ function rollDice(aRolls = 2, bRolls = 2) {
 }
 
 
+function random(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
 let neighbors = [
     [0, 1, 4],
     [1, 0, 2, 4, 5],
@@ -374,15 +404,41 @@ function Player(name, sessionId) {
 
 }
 
+function Key() {
+    this.isFound = false;
+
+    this.reset = function () {
+        this.isFound = false;
+    }
+}
+
 function Server() {
     let MIN_RAND_COMP_POWER = 4;
     let MAX_RAND_COMP_POWER = 8;
     this.owner = null;
     this.id = null;
-    this.computingPower = Math.floor(Math.random() * (MAX_RAND_COMP_POWER - MIN_RAND_COMP_POWER + 1) + MIN_RAND_COMP_POWER);
+    this.computingPower = random(MIN_RAND_COMP_POWER, MAX_RAND_COMP_POWER);
     this.ransom = false;
     this.hasKey = false;
+    this.keys = [];
     this.canSee = [];
+
+    this.addKey = function (key) {
+        this.keys.push(key);
+        this.hasKey = true;
+    };
+
+    this.removeKeys = function () {
+        let keysToReturn = [];
+
+        this.keys.forEach(function (key) {
+            keysToReturn.push(key);
+        });
+
+        this.keys = [];
+        this.hasKey = false;
+        return keysToReturn;
+    };
 
     this.getServerForPlayer = function (sessionId) {
         if (this.canSee.includes(sessionId)) {
@@ -495,6 +551,9 @@ function Game() {
                 case ACTIONS.PAY_RANSOM:
                     payRansom(order.sessionId, server);
                     break;
+                case ACTIONS.WIPE_SERVER:
+                    wipeServer(order.sessionId, server);
+                    break;
                 case ACTIONS.SCAN:
                     scanServer(order.sessionId, server);
                     break;
@@ -535,7 +594,11 @@ function Game() {
         for (let key in this.players) {
             this.players[key].updatePlayer(io);
         }
-    }
+    };
+
+    this.randomServer = function () {
+        return this.servers[random(0,3)][random(0,9)];
+    };
 }
 
 function Ransom(playerId, isRansomed = true) {
