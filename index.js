@@ -65,6 +65,17 @@ io.on('connection', function (socket) {
                 io.to(i).emit(UPDATE_BOARD_MSG, JSON.stringify(game.getServesForUpdate(i)));
                 io.to(i).emit(GAME_MESSAGE, "Orders Executed")
             }
+
+            let keyOwner = game.keys[0].owner;
+            let numFound = 0;
+            game.keys.forEach(function (key) {
+                if (keyOwner === key.owner && key.isFound) {
+                    ++numFound
+                }
+            });
+            if (numFound === game.keys.length) {
+                io.to(socket.id).emit(GAME_MESSAGE, game.getPlayerByPId(keyOwner).name + ' Won!');
+            }
         }
     });
 
@@ -78,10 +89,13 @@ io.on('connection', function (socket) {
             }
             let idLetter = idLetterToNumber(order.object.substr(0, 1));
             let idNum = order.object.substr(1);
-            let server = game.servers[idLetter][idNum];
+            let server = getGame().servers[idLetter][idNum];
 
-            let player = game.players[socket.id];
+            let player = getGame().players[socket.id];
             if ((server.owner === player.playerId && !server.ransom.isRansomed) || server.ransom.playerId === player.playerId) {
+                if (server.hasKey && player.playerId === server.owner) {
+                    server.keys[0].isFound = true
+                }
                 io.to(socket.id).emit(FIND_KEY, server.hasKey.toString());
             } else {
                 io.to(socket.id).emit(TERMINAL_MESSAGE, FIND_KEY + ": cannot open " + server.id + " filesystem: Permission denied");
@@ -98,7 +112,7 @@ io.on('connection', function (socket) {
             }
             let idLetter = idLetterToNumber(order.object.substr(0, 1));
             let idNum = order.object.substr(1, 1);
-            let server = game.servers[idLetter][idNum];
+            let server = getGame().servers[idLetter][idNum];
 
             let secondIdLetter = idLetterToNumber(order.object.substr(3, 1));
             let secondIdNum = order.object.substr(4, 1);
@@ -137,7 +151,7 @@ io.on('connection', function (socket) {
 function moveKeys(serverFrom, serverTo) {
     let keys = serverFrom.removeKeys();
 
-    keys.forEach(function (key, index) {
+    keys.forEach(function (key) {
         serverTo.addKey(key);
     });
 }
@@ -154,7 +168,7 @@ function defendServer(sessionId, server) {
 function acquireServer(sessionId, server) {
     let player = getPlayer(sessionId);
 
-    if (server.ransom.isRansomed && server.ransom.playerId != player.playerId) {
+    if (server.ransom.isRansomed && server.ransom.playerId !== player.playerId) {
         return;
     }
 
@@ -164,11 +178,16 @@ function acquireServer(sessionId, server) {
 
     if (player.roundComputingPower >= acquireCost) {
         if (server.owner === null) {
-            server.owner = rollDice(player.computingPower, (((getGame().serversOwned + 1) * 0.01) + player.serverCount) + player.computingPower * ((Math.floor(Math.random() * (11 - 8)) + 8) / 10)) ? player.playerId : null;
+            server.owner = rollDice(player.computingPower, ((((getGame().serversOwned * 1) + 1) * 0.01) + player.serverCount) + player.computingPower * ((Math.floor(Math.random() * (11 - 8)) + 8) / 10)) ? player.playerId : null;
             getGame().serversOwned += server.owner === null ? 0 : 1;
-            game.players[sessionId].winningServerCount += game.winningServers.includes(server.id) ? 1 : 0;
         } else if (server.owner !== player.playerId) {
             server.owner = rollPercentDice(0.45 - calcCompPowerPercentage(player.computingPower, game.getPlayerByPId(server.owner).computingPower + server.computingPower)) ? player.playerId : server.owner;
+        }
+
+        if (server.hasKey && server.owner === player.playerId) {
+            server.keys.forEach(function (key) {
+                key.owner = player.playerId;
+            })
         }
 
         calculateCanSee(getGame(sessionId));
@@ -201,14 +220,22 @@ function wipeServer(sessionId, server) {
     if (server.owner === player.playerId) {
         server.ransom = new Ransom(null, false);
         server.owner = null;
+        --game.serversOwned;
 
         if (server.hasKey) {
-            let newKeyServer = getGame(sessionId).randomServer();
-            while (newKeyServer.hasKey) {
-                newKeyServer = getGame(sessionId).randomServer();
-            }
+            let keys = serverFrom.removeKeys();
 
-            moveKeys(server, newKeyServer);
+            let i;
+            for (i = 0; i < keys.length; ++i) {
+                let key = keys[i];
+                let newKeyServer = getGame(sessionId).randomServer();
+                while (newKeyServer.hasKey) {
+                    newKeyServer = getGame(sessionId).randomServer();
+                }
+
+                key.reset();
+                newKeyServer.addKey(key);
+            }
         }
     }
 }
@@ -244,10 +271,13 @@ function serverFactory(sessionId) {
                 servers[i][j].id = id + j;
                 servers[i][j].isRansomed = new Ransom("", false);
 
-                if (blockNeedsFile && (j === 9 || rollDice(2, 2))) {
+                if (blockNeedsFile /*&& (j === 9 || rollDice(2, 2))*/) {
                     blockNeedsFile = false;
-                    servers[i][j].addKey(new Key());
-                    getGame(sessionId).winningServers.push(servers[i][j].id);
+
+                    let key = new Key();
+
+                    servers[i][j].addKey(key);
+                    game.keys.push(key);
                 }
             }
         }
@@ -270,13 +300,10 @@ function idNumberToLetter(i) {
     switch (i) {
         case 0:
             return 'A';
-            break;
         case 1:
             return 'B';
-            break;
         case 2:
             return 'C';
-            break;
         case 3:
             return 'D';
     }
@@ -286,13 +313,10 @@ function idLetterToNumber(letter) {
     switch (letter.toUpperCase()) {
         case 'A':
             return 0;
-            break;
         case 'B':
             return 1;
-            break;
         case 'C':
             return 2;
-            break;
         case 'D':
             return 3;
     }
@@ -406,8 +430,10 @@ function Player(name, sessionId) {
 
 function Key() {
     this.isFound = false;
+    this.owner = null;
 
     this.reset = function () {
+        this.owner = null;
         this.isFound = false;
     }
 }
@@ -459,8 +485,9 @@ function Game() {
     this.playerCount = 0;
 
     this.servers = [];
-    this.winningServers = [];
     this.serversOwned = 0;
+
+    this.keys = [];
 
     this.playerOrders = [];
     this.playerOrdersCount = 0;
@@ -597,7 +624,7 @@ function Game() {
     };
 
     this.randomServer = function () {
-        return this.servers[random(0,3)][random(0,9)];
+        return this.servers[random(0, 3)][random(0, 9)];
     };
 }
 
