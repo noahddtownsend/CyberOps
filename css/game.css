@@ -102,6 +102,7 @@ p {
 
 .orderCard img {
     position: relative;
+    width: 73px;
     grid-area: icon;
     top: 50%;
     transform: translateY(-50%);

@@ -3,24 +3,11 @@ const app = express();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const PriorityQueue = require('fastpriorityqueue');
-
-const UPDATE_BOARD_MSG = "updateServerBoard";
-const UPDATE_PLAYER_MSG = "updatePlayer";
-const GAME_MESSAGE = "message";
-const GLOBAL_MESSAGE = "globalMessage";
-const TERMINAL_MESSAGE = "terminal";
-
-const FIND_KEY = "findKey";
-const MOVE_KEY = "moveKey";
-
-const ACTIONS = {
-    "DEFEND": 0,
-    "ACQUIRE": 1,
-    "RANSOM": 2,
-    "PAY_RANSOM": 3,
-    "WIPE_SERVER": 4,
-    "SCAN": 100
-};
+const Player = require('./server_side_js/player')
+const MessageTypes = require('./shared_js/MessageTypes')
+const {MOVE_KEY} = require('./shared_js/constants');
+const {FIND_KEY} = require('./shared_js/constants');
+const {ACTIONS} = require('./shared_js/constants')
 
 app.use(express.static('public'));
 
@@ -48,11 +35,13 @@ http.listen(3000, function () {
 //TODO: update everywhere to use getGame() instead
 let game = new Game();
 
+let gameController = new GameControl();
+
 io.on('connection', function (socket) {
     let game = getGame(socket.id);
 
     socket.on('submitOrders', function (json) {
-        io.to(socket.id).emit(GAME_MESSAGE, 'Orders Received');
+        io.to(socket.id).emit(MessageTypes.GAME_MESSAGE, 'Orders Received');
 
         let incomingOrders = JSON.parse(json);
 
@@ -62,8 +51,8 @@ io.on('connection', function (socket) {
             game.executeOrders();
             game.updateAllPlayers(io);
             for (let i  in game.players) {
-                io.to(i).emit(UPDATE_BOARD_MSG, JSON.stringify(game.getServesForUpdate(i)));
-                io.to(i).emit(GAME_MESSAGE, "Orders Executed")
+                io.to(i).emit(MessageTypes.UPDATE_BOARD_MSG, JSON.stringify(game.getServesForUpdate(i)));
+                io.to(i).emit(MessageTypes.GAME_MESSAGE, "Orders Executed")
             }
 
             let keyOwner = game.keys[0].owner;
@@ -74,7 +63,7 @@ io.on('connection', function (socket) {
                 }
             });
             if (numFound === game.keys.length) {
-                io.to(socket.id).emit(GAME_MESSAGE, game.getPlayerByPId(keyOwner).name + ' Won!');
+                io.to(socket.id).emit(MessageTypes.GAME_MESSAGE, game.getPlayerByPId(keyOwner).name + ' Won!');
             }
         }
     });
@@ -98,7 +87,7 @@ io.on('connection', function (socket) {
                 }
                 io.to(socket.id).emit(FIND_KEY, server.hasKey.toString());
             } else {
-                io.to(socket.id).emit(TERMINAL_MESSAGE, FIND_KEY + ": cannot open " + server.id + " filesystem: Permission denied");
+                io.to(socket.id).emit(MessageTypes.TERMINAL_MESSAGE, FIND_KEY + ": cannot open " + server.id + " filesystem: Permission denied");
             }
         }
     });
@@ -126,9 +115,9 @@ io.on('connection', function (socket) {
 
                 io.to(socket.id).emit(MOVE_KEY, server.hasKey.toString());
             } else if (server.ransom.playerId === player.playerId) {
-                io.to(socket.id).emit(TERMINAL_MESSAGE, MOVE_KEY + ": cannot write " + server.id + " filesystem: Read-only");
+                io.to(socket.id).emit(MessageTypes.TERMINAL_MESSAGE, MOVE_KEY + ": cannot write " + server.id + " filesystem: Read-only");
             } else {
-                io.to(socket.id).emit(TERMINAL_MESSAGE, MOVE_KEY + ": cannot open " + server.id + " filesystem: Permission denied");
+                io.to(socket.id).emit(MessageTypes.TERMINAL_MESSAGE, MOVE_KEY + ": cannot open " + server.id + " filesystem: Permission denied");
             }
         }
     });
@@ -138,12 +127,12 @@ io.on('connection', function (socket) {
     });
 
     socket.on('requestUpdate', function () {
-        socket.emit(UPDATE_BOARD_MSG, JSON.stringify(game.getServesForUpdate(socket.id)));
-        socket.emit(UPDATE_PLAYER_MSG, JSON.stringify(getPlayer(socket.id)));
+        socket.emit(MessageTypes.UPDATE_BOARD_MSG, JSON.stringify(game.getServesForUpdate(socket.id)));
+        socket.emit(MessageTypes.UPDATE_PLAYER_MSG, JSON.stringify(getPlayer(socket.id)));
     });
 
     serverFactory(socket.id);
-    new Player("HackAttack", socket.id);
+    new Player("HackAttack", socket.id, getGame(socket.id), gameController);
     getPlayer(socket.id).updatePlayer(socket);
     fullUpdate(socket);
 });
@@ -253,8 +242,8 @@ function scanServer(sessionId, server) {
 }
 
 function fullUpdate(socket) {
-    io.to(socket.id).emit(UPDATE_PLAYER_MSG, JSON.stringify(getPlayer(socket.id)));
-    io.to(socket.id).emit(UPDATE_BOARD_MSG, JSON.stringify(getGame(socket.id).getServesForUpdate(socket.id)));
+    io.to(socket.id).emit(MessageTypes.UPDATE_PLAYER_MSG, JSON.stringify(getPlayer(socket.id)));
+    io.to(socket.id).emit(MessageTypes.UPDATE_BOARD_MSG, JSON.stringify(getGame(socket.id).getServesForUpdate(socket.id)));
 }
 
 function serverFactory(sessionId) {
@@ -285,7 +274,7 @@ function serverFactory(sessionId) {
         game.servers = servers;
     }
 
-    io.to(sessionId).emit(UPDATE_BOARD_MSG, JSON.stringify(getGame(sessionId).getServesForUpdate(sessionId)));
+    io.to(sessionId).emit(MessageTypes.UPDATE_BOARD_MSG, JSON.stringify(getGame(sessionId).getServesForUpdate(sessionId)));
 }
 
 function getPlayer(sessionId) {
@@ -384,48 +373,7 @@ function calculateCanSee(game) {
 function stringIsValidServer(string) {
     return string === "local"
         || (string.length === 2)
-        && /[a-d]/.test(string.toLowerCase().substr(0, 1))
-        && /[0-9]/.test(string.toLowerCase().substr(1))
-}
-
-function Player(name, sessionId) {
-    this.name = name;
-    this.sessionId = sessionId;
-    this.playerId = '';
-    this.computingPower = 20;
-    this.roundComputingPower = this.computingPower;
-    this.tempComputingPower = 0;
-    this.serverCount = 0;
-    this.winningServerCount = 0;
-    this.messages = [];
-
-    game.addPlayer(this);
-
-    this.updatePlayer = function (io) {
-        this.calculateComputingPower();
-        this.tempComputingPower = 0;
-        io.to(this.sessionId).emit(UPDATE_PLAYER_MSG, JSON.stringify(this));
-    };
-
-    this.calculateComputingPower = function () {
-        this.serverCount = 0;
-        this.computingPower = 20;
-        for (let i = 0; i < getGame(this.sessionId).servers.length; ++i) {
-            for (let j = 0; j < getGame(this.sessionId).servers[i].length; ++j) {
-                let server = getGame(this.sessionId).servers[i][j];
-                if (server.owner === this.playerId && !server.ransom.isRansomed) {
-                    ++this.serverCount;
-                    this.computingPower += server.computingPower < 8 ? server.computingPower : 7;
-                }
-            }
-        }
-
-        this.computingPower += Math.ceil(Math.log2(this.serverCount > 0 ? this.serverCount : 1));
-        this.computingPower += this.tempComputingPower;
-        this.roundComputingPower = this.computingPower;
-    }
-
-
+        && /[a-d][0-9]/.test(string.toLowerCase().substr(1))
 }
 
 function Key() {
@@ -637,4 +585,10 @@ function Order(order, sessionId) {
     this.action = order.action;
     this.object = order.object;
     this.sessionId = sessionId;
+}
+
+function GameControl() {
+    this.sendMessageToPlayer = function (sessionId, message, channel){
+        io.to(sessionId).emit(channel, message);
+    }
 }
