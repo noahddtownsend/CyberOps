@@ -15,7 +15,7 @@ const ACTIONS = {
 
 socket.on('findKey', function (msg) {
     setTimeout(function () {
-        if (msg === true.toString()) {
+        if (msg.toString() === true.toString()) {
             printToTerminal("Key found!")
         } else {
             printToTerminal("Key not found")

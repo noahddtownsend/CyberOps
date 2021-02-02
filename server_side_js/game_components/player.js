@@ -1,6 +1,6 @@
 module.exports = Player;
 
-MessageTypes = require('../shared_js/MessageTypes');
+MessageTypes = require('../../shared_js/MessageTypes');
 
 function Player(name, sessionId, game, gameControl) {
     this.name = name;

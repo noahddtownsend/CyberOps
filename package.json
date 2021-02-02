@@ -3,12 +3,13 @@
   "version": "0.0.1",
   "description": "CyberOps Multiplayer Game",
   "dependencies": {
-    "debug": "^4.1.1",
+    "debug": "^4.3.1",
     "express": "^4.17.1",
     "fastpriorityqueue": "^0.6.3",
     "fresh": "^0.5.2",
-    "lodash": "^4.17.15",
-    "mime": "^2.4.4",
-    "socket.io": "^2.3.0"
+    "lodash": "^4.17.20",
+    "mime": "^2.5.0",
+    "pseudo-random": "^0.6.0",
+    "socket.io": "^3.1.0"
   }
 }

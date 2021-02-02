@@ -1,6 +1,3 @@
-exports.FIND_KEY = "findKey";
-exports.MOVE_KEY = "moveKey";
-
 exports.ACTIONS = {
     "DEFEND": 0,
     "ACQUIRE": 1,
