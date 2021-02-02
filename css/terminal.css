@@ -27,6 +27,7 @@
 
 #terminalContent {
     font-size: 1.1em;
+    line-height: 1.1em;
 }
 
 #terminalFeedback {
@@ -57,5 +58,17 @@
     height: calc(100% - 70px);
     padding: 20px;
     overflow-y: scroll;
+}
+
+a {
+    color: #1ED1E5;
+}
+
+a:hover {
+    color: white;
+}
+
+a:visited {
+    color: #1ED1E5;
 }
 
