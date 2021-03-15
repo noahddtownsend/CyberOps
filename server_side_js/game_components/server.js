@@ -4,6 +4,8 @@ const Ransom = require("./ransom");
 const Key = require("./key");
 const {rollPercentDice} = require("../dice");
 const {rollDice} = require("../dice");
+const {sleep} = require('../util');
+
 module.exports = {
     Server,
 
@@ -13,7 +15,7 @@ module.exports = {
             && /[a-d][0-9]/.test(string.toLowerCase().substr(1))
     },
 
-    serverFactory: function (sessionId, game, gameMessenger) {
+    serverFactory: async function (sessionId, game, gameMessenger) {
         if (game.servers.length < 1) {
             let servers = [];
             for (let i = 0; i < 4; ++i) {
@@ -27,13 +29,15 @@ module.exports = {
                     servers[i][j].id = id + j;
                     servers[i][j].isRansomed = new Ransom("", false);
 
-                    if (blockNeedsFile && (j === 9 || rollPercentDice(0.50))) {
+                    if (blockNeedsFile && (j === 9 || rollPercentDice(0.45))) {
                         blockNeedsFile = false;
 
                         let key = new Key();
 
                         servers[i][j].addKey(key);
                         game.keys.push(key);
+
+                        await sleep(10)
                     }
                 }
             }

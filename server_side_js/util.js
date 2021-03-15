@@ -1,7 +1,15 @@
-const Random = require('pseudo-random');
+const Random = require('random');
+
+const random = Random.uniform();
 
 module.exports = {
     random: function (min, max) {
-        return Math.floor(Random((new Date()).getTime()).random() * (max - min + 1) + min);
+        return Math.floor(random() * (max - min + 1) + min);
+    },
+
+    sleep: function (ms) {
+        return new Promise((resolve) => {
+            setTimeout(resolve, ms);
+        });
     }
 }

@@ -1,8 +1,11 @@
-const Random = require('pseudo-random');
+const Random = require('random');
+
+const random = Random.uniform();
 
 module.exports = {
     rollPercentDice: function (percent = 0.50) {
-        return Random((new Date()).getTime()).random() < percent;
+        let rand = random();
+        return  rand < percent;
     },
 
     rollDice: function (aRolls = 2, bRolls = 2) {
@@ -10,11 +13,11 @@ module.exports = {
         let b = 0;
 
         for (let i = 0; i < aRolls; ++i) {
-            a += Random((new Date()).getTime()).random();
+            a += random();
         }
 
         for (let i = 0; i < bRolls; ++i) {
-            b += Random((new Date()).getTime()).random();
+            b += random();
         }
 
         return a > b;

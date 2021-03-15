@@ -123,7 +123,7 @@ function Game(gameMessenger) {
     };
 
     this.findKeys = function (order, socketId) {
-        let player = this.chplayers[socketId];
+        let player = this.players[socketId];
 
         if (order != null) {
             if (order.object.toLowerCase() === "local") {

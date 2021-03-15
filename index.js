@@ -45,7 +45,7 @@ io.on('connection', function (socket) {
         if (game.playerOrdersCount === game.playerCount) {
             game.executeOrders();
             game.updateAllPlayers(io);
-            for (let i  in game.players) {
+            for (let i in game.players) {
                 io.to(i).emit(MessageTypes.UPDATE_BOARD_MSG, JSON.stringify(game.getServesForUpdate(i)));
                 io.to(i).emit(MessageTypes.GAME_MESSAGE, "Orders Executed")
             }
@@ -83,10 +83,11 @@ io.on('connection', function (socket) {
         fullUpdate(socket)
     });
 
-    serverFactory(socket.id, game, gameMessenger);
     new Player("HackAttack", socket.id, getGame(socket.id), gameMessenger);
     getPlayer(socket.id).updatePlayer(socket);
-    fullUpdate(socket);
+    serverFactory(socket.id, game, gameMessenger).then(_ =>
+        fullUpdate(socket)
+    )
 });
 
 function fullUpdate(socket) {
@@ -103,7 +104,7 @@ function getGame(sessionId) {
 }
 
 function GameMessenger() {
-    this.sendMessageToPlayer = function (sessionId, message, channel){
+    this.sendMessageToPlayer = function (sessionId, message, channel) {
         io.to(sessionId).emit(channel, message);
     }
 }
