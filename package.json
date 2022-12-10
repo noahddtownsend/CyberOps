@@ -4,7 +4,7 @@
   "description": "CyberOps Multiplayer Game",
   "dependencies": {
     "debug": "^4.3.1",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "fastpriorityqueue": "^0.6.3",
     "fresh": "^0.5.2",
     "lodash": "^4.17.20",
