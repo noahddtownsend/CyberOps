@@ -45,7 +45,7 @@ io.on('connection', function (socket) {
         if (game.playerOrdersCount === game.playerCount) {
             game.executeOrders();
             game.updateAllPlayers(io);
-            for (let i  in game.players) {
+            for (let i in game.players) {
                 io.to(i).emit(MessageTypes.UPDATE_BOARD_MSG, JSON.stringify(game.getServesForUpdate(i)));
                 io.to(i).emit(MessageTypes.GAME_MESSAGE, "Orders Executed")
             }
